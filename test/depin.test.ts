@@ -33,3 +33,26 @@ describe("Kite DePIN Compute Attestation Test Suite", () => {
     assert.strictEqual(result.spec.vramMb, 81920);
   });
 });
+import { DePINSlashingEvaluator } from "../src/index";
+
+describe("DePIN Slashing Evaluator Suite", () => {
+  it("should evaluate node compliance and compute penalty ratio", () => {
+    const good = DePINSlashingEvaluator.evaluateCompliance({
+      nodeId: "node-1",
+      expectedWorkloads: 100,
+      actualWorkloads: 98,
+      averageLatencyMs: 120,
+    });
+    assert.strictEqual(good.isCompliant, true);
+    assert.strictEqual(good.slashingRatioBps, 0);
+
+    const badLatency = DePINSlashingEvaluator.evaluateCompliance({
+      nodeId: "node-2",
+      expectedWorkloads: 100,
+      actualWorkloads: 95,
+      averageLatencyMs: 380, // Exceeds 250ms
+    });
+    assert.strictEqual(badLatency.isCompliant, false);
+    assert.strictEqual(badLatency.slashingRatioBps, 1000);
+  });
+});
