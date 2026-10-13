@@ -66,3 +66,12 @@ describe("Capacity Scheduler Suite", () => {
     assert.strictEqual(allocation.estimatedLatencyMs, 125);
   });
 });
+import { POPCChallengeEngine } from "../src/index";
+
+describe("POPC Challenge Engine Suite", () => {
+  it("should generate deterministic PoPC challenge seeds", () => {
+    const c1 = POPCChallengeEngine.generateChallenge("node-1", 100);
+    const c2 = POPCChallengeEngine.generateChallenge("node-1", 100);
+    assert.strictEqual(c1.challengeId, c2.challengeId);
+  });
+});
