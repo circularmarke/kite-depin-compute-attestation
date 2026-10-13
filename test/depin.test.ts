@@ -75,3 +75,33 @@ describe("POPC Challenge Engine Suite", () => {
     assert.strictEqual(c1.challengeId, c2.challengeId);
   });
 });
+import { TelemetryCollectorDaemon, StreamingLedger } from "../src/index";
+
+describe("Telemetry Daemon & Streaming Ledger Suite", () => {
+  it("should record GPU telemetry and calculate average utilization", () => {
+    const daemon = new TelemetryCollectorDaemon(10000);
+    daemon.recordTelemetry({
+      nodeId: "node-gpu-1",
+      timestamp: Date.now(),
+      gpus: [
+        { gpuIndex: 0, utilizationPercentage: 80, memoryUsedMb: 12000, memoryTotalMb: 24576, temperatureCelsius: 65, powerDrawWatts: 300 },
+        { gpuIndex: 1, utilizationPercentage: 90, memoryUsedMb: 14000, memoryTotalMb: 24576, temperatureCelsius: 68, powerDrawWatts: 320 },
+      ],
+      activeInferenceJobs: 4,
+      hardwareProofSignature: "0xproof123",
+    });
+
+    assert.strictEqual(daemon.calculateAverageUtilization(), 85);
+  });
+
+  it("should credit and claim micro-rewards through streaming ledger", () => {
+    const ledger = new StreamingLedger(100n);
+    ledger.creditInferenceTokens("node-gpu-1", 50, 1000n);
+
+    assert.strictEqual(ledger.getBalance("node-gpu-1"), 5000n);
+
+    const claimed = ledger.claimEarnings("node-gpu-1");
+    assert.strictEqual(claimed, 5000n);
+    assert.strictEqual(ledger.getBalance("node-gpu-1"), 0n);
+  });
+});
