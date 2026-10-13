@@ -56,3 +56,13 @@ describe("DePIN Slashing Evaluator Suite", () => {
     assert.strictEqual(badLatency.slashingRatioBps, 1000);
   });
 });
+import { CapacityScheduler } from "../src/index";
+
+describe("Capacity Scheduler Suite", () => {
+  it("should calculate batch size and FLOPS allocation based on hardware specs", () => {
+    const allocation = CapacityScheduler.scheduleWorkload("node-gpu-1", 32768, 4, 1000);
+    assert.strictEqual(allocation.batchSize, 16);
+    assert.strictEqual(allocation.allocatedFlops, 4000000000000n);
+    assert.strictEqual(allocation.estimatedLatencyMs, 125);
+  });
+});
